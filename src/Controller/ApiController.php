@@ -27,7 +27,6 @@ abstract class ApiController extends AbstractController
      * @Route("", methods={"POST"})
      * @param Request $request
      * @param ValidatorInterface $validator
-     * @param SerializerInterface $serializer
      * @return JsonResponse
      */
     public function create(Request $request, ValidatorInterface $validator): JsonResponse
