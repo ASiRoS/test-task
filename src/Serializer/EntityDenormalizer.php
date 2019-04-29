@@ -43,7 +43,6 @@ class EntityDenormalizer implements DenormalizerInterface
 
     public function supportsDenormalization($data, $type, $format = null)
     {
-        return true;
-
+        return is_object($data);
     }
 }
