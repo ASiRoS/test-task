@@ -5,10 +5,16 @@
         "php": "^7.1.3",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-json": "*",
         "symfony/console": "4.2.*",
         "symfony/dotenv": "4.2.*",
         "symfony/flex": "^1.1",
+        "symfony/form": "4.2.*",
         "symfony/framework-bundle": "4.2.*",
+        "symfony/orm-pack": "^1.0",
+        "symfony/serializer": "4.2.*",
+        "symfony/translation": "4.2.*",
+        "symfony/validator": "4.2.*",
         "symfony/yaml": "4.2.*"
     },
     "config": {
@@ -20,7 +26,10 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/"
-        }
+        },
+        "files": [
+            "helpers/lib.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -55,5 +64,9 @@
             "allow-contrib": false,
             "require": "4.2.*"
         }
+    },
+    "require-dev": {
+        "symfony/var-dumper": "4.2.*",
+        "symfony/web-server-bundle": "4.2.*"
     }
 }
