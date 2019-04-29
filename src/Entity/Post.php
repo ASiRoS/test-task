@@ -33,6 +33,7 @@ class Post
 
     /**
      * @ORM\ManyToOne(targetEntity="Category")
+     * @Assert\NotBlank()
      */
     private $category;
 
