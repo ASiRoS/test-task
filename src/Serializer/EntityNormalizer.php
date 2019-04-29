@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
@@ -12,15 +13,21 @@ class EntityNormalizer implements NormalizerInterface
      */
     private $normalizer;
 
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
     private const BLACKLIST = [
         '__isInitialized__',
         '__initializer__',
         '__cloner__'
     ];
 
-    public function __construct(ObjectNormalizer $normalizer)
+    public function __construct(ObjectNormalizer $normalizer, EntityManagerInterface $entityManager)
     {
         $this->normalizer = $normalizer;
+        $this->entityManager = $entityManager;
     }
 
     public function normalize($topic, $format = null, array $context = [])
@@ -36,6 +43,6 @@ class EntityNormalizer implements NormalizerInterface
 
     public function supportsNormalization($data, $format = null, array $context = [])
     {
-        return is_object($data);
+        return is_object($data) && $this->entityManager->getMetadataFactory()->isTransient(get_class($data));
     }
 }

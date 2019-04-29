@@ -27,15 +27,11 @@ abstract class ApiController extends AbstractController
      * @Route("", methods={"POST"})
      * @param Request $request
      * @param ValidatorInterface $validator
+     * @param SerializerInterface $serializer
      * @return JsonResponse
      */
-    public function create(Request $request, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, ValidatorInterface $validator, SerializerInterface $serializer): JsonResponse
     {
-        $serializer = new Serializer(
-            [new EntityDenormalizer($this->getDoctrine()->getManager())],
-            [new JsonEncoder()]
-        );
-
         $entity = static::getEntity();
         $category = $serializer->deserialize($request->getContent(), $entity, 'json');
 

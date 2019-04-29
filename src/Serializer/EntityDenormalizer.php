@@ -43,6 +43,6 @@ class EntityDenormalizer implements DenormalizerInterface
 
     public function supportsDenormalization($data, $type, $format = null)
     {
-        return is_object($data);
+        return is_object($data) && $this->entityManager->getMetadataFactory()->isTransient(get_class($data));
     }
 }
