@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use App\Helpers\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -34,15 +35,26 @@ class EntityNormalizer implements NormalizerInterface
     {
         $data = $this->normalizer->normalize($topic, $format, $context);
 
+        return $this->filter($data);
+    }
+
+    public function supportsNormalization($data, $format = null, array $context = [])
+    {
+        return Utils::isDoctrineEntity($this->entityManager, $data);
+    }
+
+    private function filter(array $data): array
+    {
+        foreach($data as $key => $value) {
+            if(is_array($value)) {
+                $data[$key] = $this->filter($value);
+            }
+        }
+
         $data = array_filter($data, function ($key) {
             return !in_array($key, self::BLACKLIST);
         }, ARRAY_FILTER_USE_KEY);
 
         return $data;
-    }
-
-    public function supportsNormalization($data, $format = null, array $context = [])
-    {
-        return is_object($data) && $this->entityManager->getMetadataFactory()->isTransient(get_class($data));
     }
 }

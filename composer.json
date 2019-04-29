@@ -26,7 +26,8 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/"
-        }
+        },
+        "files": ["helpers/lib.php"]
     },
     "autoload-dev": {
         "psr-4": {
