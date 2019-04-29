@@ -12,7 +12,7 @@ class Utils
      * @param string|object $class
      * @return bool
      */
-    public static function isDoctrineEntity(EntityManager $em, $class)
+    public static function isDoctrineEntity(EntityManager $em, $class): bool
     {
         if(is_object($class)) {
             $class = ($class instanceof Proxy) ? get_parent_class($class) : get_class($class);

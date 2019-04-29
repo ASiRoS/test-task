@@ -36,7 +36,6 @@ class EntityDenormalizer extends ObjectNormalizer implements DenormalizerInterfa
                 $value = $this->entityManager->getRepository($this->getEntityRelativePath($field))->findOneBy($value);
             }
 
-
             $this->setAttributeValue($object, $field, $value);
         }
 
