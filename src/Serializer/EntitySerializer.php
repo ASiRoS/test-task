@@ -41,15 +41,7 @@ class EntitySerializer extends ObjectNormalizer implements NormalizerInterface, 
 
     public function denormalize($data, $class, $format = null, array $context = [])
     {
-        $object = new $class;
-
-        foreach($data as $field => $value) {
-            if(is_array($value)) {
-                $value = $this->entityManager->getRepository($this->getEntityRelativePath($field))->findOneBy($value);
-            }
-
-            $this->setAttributeValue($object, $field, $value);
-        }
+        $object = $this->create($class, $data);
 
         return $object;
     }
@@ -69,6 +61,26 @@ class EntitySerializer extends ObjectNormalizer implements NormalizerInterface, 
     public function supportsDenormalization($data, $type, $format = null)
     {
         return Utils::isDoctrineEntity($this->entityManager, $type);
+    }
+
+    private function create(string $entity, array $data)
+    {
+        $object = new $entity;
+
+        foreach($data as $field => $value) {
+            if(is_array($value)) {
+                $className = $this->getEntityRelativePath($field);
+                if(isset($value['id'])) {
+                    $value = $this->entityManager->getRepository($className)->findOneBy($value);
+                } else {
+                    $value = $this->create($className, $value);
+                }
+            }
+
+            $this->setAttributeValue($object, $field, $value);
+        }
+
+        return $object;
     }
 
     private function getEntityRelativePath($entityName): string
