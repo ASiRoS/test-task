@@ -10,22 +10,34 @@ use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-class EntityDenormalizer extends ObjectNormalizer implements DenormalizerInterface
+class EntitySerializer extends ObjectNormalizer implements NormalizerInterface, DenormalizerInterface
 {
+    private const BLACKLIST = [
+        '__isInitialized__',
+        '__initializer__',
+        '__cloner__'
+    ];
+
     /**
      * @var EntityManagerInterface
      */
     private $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager, ClassMetadataFactoryInterface $classMetadataFactory = null, NameConverterInterface $nameConverter = null, PropertyAccessorInterface $propertyAccessor = null, PropertyTypeExtractorInterface $propertyTypeExtractor = null, ClassDiscriminatorResolverInterface $classDiscriminatorResolver = null, callable $objectClassResolver = null, array $defaultContext = [])
+    /**
+     * @var ObjectNormalizer
+     */
+    private $normalizer;
+
+    public function __construct(ObjectNormalizer $normalizer, EntityManagerInterface $entityManager, ClassMetadataFactoryInterface $classMetadataFactory = null, NameConverterInterface $nameConverter = null, PropertyAccessorInterface $propertyAccessor = null, PropertyTypeExtractorInterface $propertyTypeExtractor = null, ClassDiscriminatorResolverInterface $classDiscriminatorResolver = null, callable $objectClassResolver = null, array $defaultContext = [])
     {
         parent::__construct($classMetadataFactory, $nameConverter, $propertyAccessor, $propertyTypeExtractor, $classDiscriminatorResolver, $objectClassResolver, $defaultContext);
 
         $this->entityManager = $entityManager;
+        $this->normalizer = $normalizer;
     }
-
 
     public function denormalize($data, $class, $format = null, array $context = [])
     {
@@ -42,6 +54,18 @@ class EntityDenormalizer extends ObjectNormalizer implements DenormalizerInterfa
         return $object;
     }
 
+    public function normalize($topic, $format = null, array $context = [])
+    {
+        $data = $this->normalizer->normalize($topic, $format, $context);
+
+        return $this->filter($data);
+    }
+
+    public function supportsNormalization($data, $format = null, array $context = [])
+    {
+        return Utils::isDoctrineEntity($this->entityManager, $data);
+    }
+
     public function supportsDenormalization($data, $type, $format = null)
     {
         return Utils::isDoctrineEntity($this->entityManager, $type);
@@ -56,5 +80,19 @@ class EntityDenormalizer extends ObjectNormalizer implements DenormalizerInterfa
         }
 
         return 'App\Entity\\' . ucfirst($entityName);
+    }
+
+
+    private function filter(array $data): array
+    {
+        foreach($data as $key => $value) {
+            if(is_array($value)) {
+                $data[$key] = $this->filter($value);
+            }
+        }
+        $data = array_filter($data, function ($key) {
+            return !in_array($key, self::BLACKLIST);
+        }, ARRAY_FILTER_USE_KEY);
+        return $data;
     }
 }
